@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useProfileStore from '../stores/useProfileStore';
 import useSocket, { Profile } from '../hooks/useSocket';
@@ -16,7 +16,7 @@ const SetupPage: React.FC = () => {
     nickname: '',
     role: '세션',
     icon: '🎸',
-    favoriteCommands: []
+    favoriteCommands: [],
   });
 
   // Load saved profile if exists
@@ -55,19 +55,19 @@ const SetupPage: React.FC = () => {
 
   // Handle role change
   const handleRoleChange = (role: UserRole) => {
-    setProfile(prev => ({ ...prev, role }));
+    setProfile((prev) => ({ ...prev, role }));
   };
 
   // Handle icon selection
   const handleIconSelect = (icon: string) => {
-    setProfile(prev => ({ ...prev, icon }));
+    setProfile((prev) => ({ ...prev, icon }));
   };
 
   // Handle command toggle
   const handleCommandToggle = (command: string) => {
-    setProfile(prev => {
+    setProfile((prev) => {
       const commands = prev.favoriteCommands.includes(command)
-        ? prev.favoriteCommands.filter(c => c !== command)
+        ? prev.favoriteCommands.filter((c) => c !== command)
         : [...prev.favoriteCommands, command];
       return { ...prev, favoriteCommands: commands };
     });
@@ -93,7 +93,7 @@ const SetupPage: React.FC = () => {
             <input
               type="text"
               value={profile.nickname}
-              onChange={e => setProfile(prev => ({ ...prev, nickname: e.target.value }))}
+              onChange={(e) => setProfile((prev) => ({ ...prev, nickname: e.target.value }))}
               className="w-full p-2 border border-input rounded-md"
               placeholder="닉네임을 입력하세요"
               required
@@ -104,13 +104,13 @@ const SetupPage: React.FC = () => {
           <div className="space-y-2">
             <label className="text-sm font-medium">역할</label>
             <div className="flex gap-2">
-              {(['세션', '인도자', '목사님'] as UserRole[]).map(role => (
+              {(['세션', '인도자', '목사님'] as UserRole[]).map((role) => (
                 <button
                   key={role}
                   type="button"
                   className={`flex-1 py-2 rounded-md ${
-                    profile.role === role 
-                      ? 'bg-primary text-primary-foreground' 
+                    profile.role === role
+                      ? 'bg-primary text-primary-foreground'
                       : 'bg-secondary text-secondary-foreground'
                   }`}
                   onClick={() => handleRoleChange(role)}
@@ -130,13 +130,13 @@ const SetupPage: React.FC = () => {
           <div className="space-y-2">
             <label className="text-sm font-medium">아이콘</label>
             <div className="grid grid-cols-4 gap-2">
-              {icons.map(icon => (
+              {icons.map((icon) => (
                 <button
                   key={icon}
                   type="button"
                   className={`aspect-square flex items-center justify-center text-2xl rounded-md ${
-                    profile.icon === icon 
-                      ? 'bg-primary text-primary-foreground' 
+                    profile.icon === icon
+                      ? 'bg-primary text-primary-foreground'
                       : 'bg-secondary text-secondary-foreground'
                   }`}
                   onClick={() => handleIconSelect(icon)}
@@ -151,13 +151,13 @@ const SetupPage: React.FC = () => {
           <div className="space-y-2">
             <label className="text-sm font-medium">자주 쓰는 명령</label>
             <div className="grid grid-cols-5 gap-2">
-              {availableCommands.map(command => (
+              {availableCommands.map((command) => (
                 <button
                   key={command}
                   type="button"
                   className={`aspect-square flex items-center justify-center text-xl rounded-md ${
-                    profile.favoriteCommands.includes(command) 
-                      ? 'bg-primary text-primary-foreground' 
+                    profile.favoriteCommands.includes(command)
+                      ? 'bg-primary text-primary-foreground'
                       : 'bg-secondary text-secondary-foreground'
                   }`}
                   onClick={() => handleCommandToggle(command)}
@@ -169,10 +169,7 @@ const SetupPage: React.FC = () => {
           </div>
 
           {/* Submit button */}
-          <button
-            type="submit"
-            className="w-full py-3 bg-primary text-primary-foreground rounded-md font-medium"
-          >
+          <button type="submit" className="w-full py-3 bg-primary text-primary-foreground rounded-md font-medium">
             저장하기
           </button>
 
@@ -180,12 +177,14 @@ const SetupPage: React.FC = () => {
           <button
             type="button"
             className="w-full py-3 bg-secondary text-secondary-foreground rounded-md font-medium"
-            onClick={() => setProfile({
-              nickname: '',
-              role: '세션',
-              icon: '🎸',
-              favoriteCommands: []
-            })}
+            onClick={() =>
+              setProfile({
+                nickname: '',
+                role: '세션',
+                icon: '🎸',
+                favoriteCommands: [],
+              })
+            }
           >
             초기화
           </button>

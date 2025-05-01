@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 interface UseSocketOptions {
@@ -26,7 +26,7 @@ export interface SheetChange {
 
 // Define a type for drawing paths
 export interface DrawingPath {
-  points: Array<{x: number; y: number}>;
+  points: Array<{ x: number; y: number }>;
   color: string;
   width: number;
   opacity?: number;
@@ -45,9 +45,8 @@ export interface CommandEvent {
 
 const useSocket = (options: UseSocketOptions = {}) => {
   // In development, connect to port 3001 for WebSocket
-  const defaultUrl = process.env.NODE_ENV === 'production' 
-    ? window.location.origin 
-    : window.location.origin.replace(/:\d+$/, ':3001');
+  const defaultUrl =
+    process.env.NODE_ENV === 'production' ? window.location.origin : window.location.origin.replace(/:\d+$/, ':3001');
 
   const { url = defaultUrl, autoConnect = true } = options;
 
@@ -121,7 +120,7 @@ const useSocket = (options: UseSocketOptions = {}) => {
     sendSheetChange,
     sendDrawingUpdate,
     sendCommand,
-    subscribe
+    subscribe,
   };
 };
 

@@ -21,20 +21,20 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <HomePage />,
-    errorElement: <NotFoundPage />
+    errorElement: <NotFoundPage />,
   },
   {
     path: '/worship',
-    element: <WorshipPage />
+    element: <WorshipPage />,
   },
   {
     path: '/setup',
-    element: <SetupPage />
+    element: <SetupPage />,
   },
   {
     path: '/admin',
-    element: <AdminPage />
-  }
+    element: <AdminPage />,
+  },
 ]);
 
 // Render the app
@@ -43,5 +43,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
     </QueryClientProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

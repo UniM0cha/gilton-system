@@ -17,8 +17,8 @@ const useProfileStore = create<ProfileState>()(
     }),
     {
       name: 'gilton-profile',
-    }
-  )
+    },
+  ),
 );
 
 export default useProfileStore;

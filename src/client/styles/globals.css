@@ -68,8 +68,20 @@ html, body {
   overscroll-behavior: none;
   height: 100%;
   width: 100%;
-  overflow: hidden;
-  position: fixed;
+}
+
+/* Apply fixed position only for mobile devices (PWA) */
+@media (max-width: 768px) {
+  html, body {
+    overflow: hidden;
+    position: fixed;
+  }
+}
+
+/* Allow scrolling in Electron app */
+.electron-app {
+  overflow: auto !important;
+  position: relative !important;
 }
 
 #root {

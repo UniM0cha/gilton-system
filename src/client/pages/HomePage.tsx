@@ -40,15 +40,15 @@ const HomePage: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-4 w-full max-w-md">
-        <Link 
-          to="/worship" 
+        <Link
+          to="/worship"
           className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-4 rounded-lg text-lg font-medium"
         >
           예배 시작하기
         </Link>
 
-        <Link 
-          to="/setup" 
+        <Link
+          to="/setup"
           className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-6 py-4 rounded-lg text-lg font-medium"
         >
           프로필 설정
@@ -57,8 +57,9 @@ const HomePage: React.FC = () => {
 
       <div className="mt-12 text-sm text-muted-foreground">
         <p>동일한 Wi-Fi 네트워크에 연결되어 있어야 합니다.</p>
-        <p>서버 상태: 
-          <span className={isConnected ? "text-green-500" : "text-destructive"}>
+        <p>
+          서버 상태:
+          <span className={isConnected ? 'text-green-500' : 'text-destructive'}>
             {isConnected ? ' 연결됨' : ' 연결 안됨'}
           </span>
         </p>
