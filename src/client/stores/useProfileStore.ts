@@ -1,14 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { UserProfile } from '../types/user';
+import { Profile } from '../hooks/useSocket';
 
 interface ProfileState {
-  profile: UserProfile | null;
-  setProfile: (profile: UserProfile) => void;
+  profile: Profile | null;
+  setProfile: (profile: Profile) => void;
   clearProfile: () => void;
 }
 
-export const useProfileStore = create<ProfileState>()(
+const useProfileStore = create<ProfileState>()(
   persist(
     (set) => ({
       profile: null,
@@ -16,7 +16,9 @@ export const useProfileStore = create<ProfileState>()(
       clearProfile: () => set({ profile: null }),
     }),
     {
-      name: 'gilton-profile-storage',
+      name: 'gilton-profile',
     }
   )
 );
+
+export default useProfileStore;
