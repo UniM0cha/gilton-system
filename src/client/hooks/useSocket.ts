@@ -44,7 +44,12 @@ export interface CommandEvent {
 }
 
 const useSocket = (options: UseSocketOptions = {}) => {
-  const { url = window.location.origin, autoConnect = true } = options;
+  // In development, connect to port 3001 for WebSocket
+  const defaultUrl = process.env.NODE_ENV === 'production' 
+    ? window.location.origin 
+    : window.location.origin.replace(/:\d+$/, ':3001');
+
+  const { url = defaultUrl, autoConnect = true } = options;
 
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);

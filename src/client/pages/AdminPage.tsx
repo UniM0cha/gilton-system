@@ -30,8 +30,12 @@ const AdminPage: React.FC = () => {
 
   // Connect to WebSocket server
   useEffect(() => {
-    // Connect to the same host (in development, this will be localhost:3000)
-    const newSocket = io(window.location.origin);
+    // In development, connect to port 3001 for WebSocket
+    const socketUrl = process.env.NODE_ENV === 'production'
+      ? window.location.origin
+      : window.location.origin.replace(/:\d+$/, ':3001');
+
+    const newSocket = io(socketUrl);
 
     newSocket.on('connect', () => {
       console.log('Connected to server');
