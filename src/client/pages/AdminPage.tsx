@@ -67,9 +67,8 @@ const AdminPage: React.FC = () => {
 
   // Connect to WebSocket server
   useEffect(() => {
-    // In development, connect to port 3001 for WebSocket
-    const socketUrl =
-      process.env.NODE_ENV === 'production' ? window.location.origin : window.location.origin.replace(/:\d+$/, ':3001');
+    // 직접 Electron 서버의 WebSocket 엔드포인트에 연결
+    const socketUrl = 'http://localhost:3001';
 
     const newSocket = io(socketUrl);
 
@@ -257,15 +256,16 @@ const AdminPage: React.FC = () => {
                 });
 
                 // 서버 API를 통한 업로드 로직
-                const apiUrl = process.env.NODE_ENV === 'production' 
-                  ? '/api/upload-sheet' 
-                  : window.location.origin.replace(/:\d+$/, ':3001') + '/api/upload-sheet';
+                const apiUrl = 'http://localhost:3001/api/upload-sheet'; // 직접 Electron 서버에 연결
 
                 const response = await fetch(apiUrl, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                   },
+                  credentials: 'include',
+                  mode: 'cors',
                   body: JSON.stringify({
                     title: uploadTitle,
                     date: uploadDate,

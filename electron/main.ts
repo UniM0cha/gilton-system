@@ -10,17 +10,20 @@ import { setupAppHandlers } from './window';
 
 // 메인 애플리케이션 파일
 
+console.log('여기까지는 로그가 찍히나?');
+
 // 데이터 파일 초기화
 initDataFiles();
 
 // Express 앱 생성
 const expressApp = createHttpRoutes();
 
-// HTTP 서버 생성
-const server = http.createServer(expressApp);
+// HTTP API 서버 생성 (포트 3001)
+const httpServer = http.createServer(expressApp);
+const PORT = process.env.PORT || 3001;
 
-// 웹소켓 서버 설정
-const io = setupWebSocketServer(server);
+// WebSocket 서버를 동일한 HTTP 서버에 설정
+const io = setupWebSocketServer(httpServer);
 
 // IPC 핸들러 설정
 setupIpcHandlers(io);
@@ -28,13 +31,12 @@ setupIpcHandlers(io);
 // Electron 앱 이벤트 핸들러 설정
 setupAppHandlers();
 
-// 서버 시작
-const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-  console.log(`서버가 포트 ${PORT}에서 실행 중입니다`);
+// 서버 시작 (HTTP API와 WebSocket 모두 동일한 포트에서 실행)
+httpServer.listen(PORT, () => {
+  console.log(`서버가 포트 ${PORT}에서 실행 중입니다 (HTTP API 및 WebSocket)`);
 });
 
 // 앱 종료 시 서버 종료
 app.on('before-quit', () => {
-  server.close();
+  httpServer.close();
 });

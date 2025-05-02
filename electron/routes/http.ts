@@ -6,6 +6,15 @@ import { app } from 'electron';
 import isDev from 'electron-is-dev';
 import cors from 'cors';
 
+// 모든 도메인 허용 (개발 환경)
+const corsOptions: cors.CorsOptions = {
+  origin: true, // 요청한 Origin 그대로 반사
+  credentials: true, // 쿠키·인증정보 허용
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['*'], // 모든 커스텀 헤더 허용
+  optionsSuccessStatus: 200,
+};
+
 // HTTP 라우팅 모듈
 
 // 데이터 디렉토리 정의
@@ -20,14 +29,24 @@ export const createHttpRoutes = () => {
   const expressApp = express();
 
   // CORS 미들웨어 추가
-  expressApp.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-  }));
+  expressApp.use(cors(corsOptions));
 
-  expressApp.use(express.json());
-  expressApp.use(express.urlencoded({ extended: true }));
+  // OPTIONS 요청에 대한 CORS 프리플라이트 응답 처리
+  // 1) 모든 경로용 와일드카드
+  expressApp.options('*', cors(corsOptions));
+
+  // 2) 업로드 엔드포인트에 대한 명시적 프리플라이트
+  expressApp.options('/api/upload-sheet', cors(corsOptions));
+
+  // CORS 헤더가 실제로 붙는지 확인용 로그
+  expressApp.use((req, _res, next) => {
+    console.log('CORS middleware hit for', req.method, req.originalUrl, 'Origin:', req.headers.origin);
+    next();
+  });
+
+  // 대용량 파일 업로드를 위한 높은 제한 설정 (500MB)
+  expressApp.use(express.json({ limit: '500mb' }));
+  expressApp.use(express.urlencoded({ extended: true, limit: '500mb' }));
 
   // 프로덕션 환경에서 클라이언트 빌드 디렉토리의 정적 파일 제공
   if (!isDev) {
@@ -58,8 +77,8 @@ export const createHttpRoutes = () => {
     }
   });
 
-  // 악보 업로드 API
-  expressApp.post('/api/upload-sheet', express.json({limit: '50mb'}), async (req, res) => {
+  // 악보 업로드 API (전역 미들웨어에서 이미 express.json이 적용됨)
+  expressApp.post('/api/upload-sheet', async (req, res) => {
     try {
       const { title, date, serviceType, fileName, imageData } = req.body;
 

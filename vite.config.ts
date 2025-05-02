@@ -46,6 +46,7 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true, // Listen on all addresses
+    // 프록시 설정 제거 - 클라이언트에서 직접 Electron 서버에 연결
   },
   build: {
     outDir: 'dist/client',

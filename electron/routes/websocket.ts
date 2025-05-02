@@ -15,9 +15,11 @@ const sheetsPath = path.join(dataDir, 'sheets.json');
 export const setupWebSocketServer = (httpServer: HttpServer) => {
   const io = new SocketIOServer(httpServer, {
     cors: {
-      origin: '*',
-      methods: ['GET', 'POST'],
+      origin: ['http://localhost:3000', 'http://localhost:3001'],
+      methods: ['GET', 'POST', 'OPTIONS'],
+      credentials: true,
     },
+    path: '/socket.io',
   });
 
   // 소켓 연결 처리

@@ -44,9 +44,9 @@ export interface CommandEvent {
 }
 
 const useSocket = (options: UseSocketOptions = {}) => {
-  // In development, connect to port 3001 for WebSocket
-  const defaultUrl =
-    process.env.NODE_ENV === 'production' ? window.location.origin : window.location.origin.replace(/:\d+$/, ':3001');
+  // WebSocket 서버 URL
+  // 직접 Electron 서버의 WebSocket 엔드포인트에 연결
+  const defaultUrl = 'http://localhost:3001';
 
   const { url = defaultUrl, autoConnect = true } = options;
 

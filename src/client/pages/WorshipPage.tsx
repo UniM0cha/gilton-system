@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { io } from 'socket.io-client';
 import useProfileStore from '../stores/useProfileStore';
 import useSocket, { Command, Profile, SheetChange } from '../hooks/useSocket';
 import { Button } from '../components/ui/button';
@@ -37,7 +36,7 @@ const SheetMusicViewer: React.FC<SheetMusicViewerProps> = ({ currentSheet }) => 
     );
   }
 
-  const imageUrl = `/sheets/${currentSheet.fileName}`;
+  const imageUrl = `http://localhost:3001/sheets/${currentSheet.fileName}`;
 
   return (
     <div className="flex-1 bg-muted flex items-center justify-center overflow-auto">
@@ -130,7 +129,7 @@ const DrawingToolbar: React.FC = () => (
 const WorshipPage: React.FC = () => {
   const navigate = useNavigate();
   const { profile } = useProfileStore();
-  const { isConnected, register, sendCommand, sendSheetChange, subscribe } = useSocket();
+  const { socket, isConnected, register, sendCommand, sendSheetChange, subscribe } = useSocket();
 
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [receivedCommand, setReceivedCommand] = useState<Command | null>(null);
@@ -303,18 +302,9 @@ const WorshipPage: React.FC = () => {
             {/* 악보 업로드 버튼 추가 */}
             <SheetMusicUpload onUploadComplete={() => {
               // 업로드 완료 후 악보 목록 새로고침
-              if (isConnected) {
-                // 서버에 악보 목록 요청
-                const socket = io(
-                  process.env.NODE_ENV === 'production' 
-                    ? window.location.origin 
-                    : window.location.origin.replace(/:\d+$/, ':3001')
-                );
+              if (isConnected && socket) {
+                // 기존 소켓 연결을 사용하여 악보 목록 요청
                 socket.emit('get-sheets');
-                socket.on('sheets', (updatedSheets: Sheet[]) => {
-                  setSheets(updatedSheets);
-                  socket.disconnect();
-                });
               }
             }} />
           </div>
