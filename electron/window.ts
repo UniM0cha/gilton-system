@@ -22,16 +22,9 @@ export const createWindow = () => {
 
   // 관리자 페이지 로드
   // 개발 환경과 프로덕션 환경 모두 React Router를 사용하도록 설정
-  const adminUrl = isDev
-    ? 'http://localhost:3000/admin'
-    : 'http://localhost:3001/admin'; // 프로덕션에서도 웹 서버 사용
+  const adminUrl = isDev ? 'http://localhost:3000/admin' : 'http://localhost:3001/admin'; // 프로덕션에서도 웹 서버 사용
 
   mainWindow.loadURL(adminUrl);
-
-  // 개발 환경에서 DevTools 열기 (요구사항에 따라 제거)
-  // if (isDev) {
-  //   mainWindow.webContents.openDevTools();
-  // }
 
   mainWindow.on('closed', () => {
     mainWindow = null;

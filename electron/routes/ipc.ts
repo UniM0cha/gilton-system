@@ -1,9 +1,17 @@
-/* eslint-disable no-console */
 import * as path from 'path';
 import * as fs from 'fs';
-import { ipcMain, app, shell } from 'electron';
+import { ipcMain, shell } from 'electron';
 import { format } from 'date-fns';
 import { Server as SocketIOServer } from 'socket.io';
+import {
+  commandsPath,
+  dataDir,
+  ensureDirectoriesExist,
+  profilesPath,
+  sessionsPath,
+  sheetsDir,
+  sheetsPath,
+} from '@server/paths';
 
 // IPC 라우팅 모듈
 
@@ -15,16 +23,6 @@ interface JsonData {
   [key: string]: unknown;
 }
 
-// 데이터 디렉토리 정의
-// 애플리케이션 루트 디렉토리 (Gilton-system 폴더)
-const appRootDir = path.join(app.getAppPath(), '..');
-const dataDir = path.join(appRootDir, 'data');
-const sheetsDir = path.join(dataDir, 'sheets');
-const profilesPath = path.join(dataDir, 'profiles.json');
-const commandsPath = path.join(dataDir, 'commands.json');
-const sessionsPath = path.join(dataDir, 'sessions.json');
-const sheetsPath = path.join(dataDir, 'sheets.json');
-
 // JSON 파일 초기화 함수
 const initJsonFile = (filePath: string, defaultData: JsonData) => {
   if (!fs.existsSync(filePath)) {
@@ -34,13 +32,8 @@ const initJsonFile = (filePath: string, defaultData: JsonData) => {
 
 // 데이터 디렉토리 및 기본 JSON 파일 초기화
 export const initDataFiles = () => {
-  // 데이터 디렉토리 생성
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  if (!fs.existsSync(sheetsDir)) {
-    fs.mkdirSync(sheetsDir, { recursive: true });
-  }
+  // 데이터 디렉토리 생성 (paths.ts에서 정의된 함수 사용)
+  ensureDirectoriesExist();
 
   // 기본 JSON 파일 초기화
   initJsonFile(profilesPath, { profiles: [] });

@@ -4,7 +4,8 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "outDir": "./dist/electron",
+    "rootDir": ".",
     "composite": true
   },
-  "include": ["electron/**/*.ts", "vite.config.ts"]
+  "include": ["electron/**/*.ts", "src/shared/**/*.ts"]
 }

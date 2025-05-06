@@ -1,28 +1,18 @@
-/* eslint-disable no-console */
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import useProfileStore from '../stores/useProfileStore';
-import useSocket, { Command, Profile, SheetChange } from '../hooks/useSocket';
-import { Button } from '../components/ui/button';
-import { Label } from '../components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import SheetMusicUpload from '../components/SheetMusicUpload';
-
-// 악보 인터페이스
-interface Sheet {
-  id: string;
-  title: string;
-  fileName: string;
-  uploadedAt: string;
-  date?: string;
-  serviceType?: string;
-}
+import useProfileStore from '@client/stores/useProfileStore';
+import useSocket, { Command, Profile, SheetChange } from '@client/hooks/useSocket';
+import { Button } from '@client/components/ui/button';
+import { Label } from '@client/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@client/components/ui/select';
+import SheetMusicUpload from '@client/components/SheetMusicUpload';
+import { SheetDto } from '@shared/types/dtos';
 
 // 악보 뷰어 컴포넌트
 interface SheetMusicViewerProps {
-  currentSheet: Sheet | null;
+  currentSheet: SheetDto | null;
   currentPage: number;
 }
 
@@ -47,9 +37,9 @@ const SheetMusicViewer: React.FC<SheetMusicViewerProps> = ({ currentSheet }) => 
 
 // 악보 썸네일 컴포넌트
 interface SheetMusicThumbnailsProps {
-  sheets: Sheet[];
+  sheets: SheetDto[];
   currentSheetId: string | null;
-  onSelectSheet: (sheet: Sheet) => void;
+  onSelectSheet: (sheet: SheetDto) => void;
 }
 
 const SheetMusicThumbnails: React.FC<SheetMusicThumbnailsProps> = ({ sheets, currentSheetId, onSelectSheet }) => (
@@ -135,9 +125,9 @@ const WorshipPage: React.FC = () => {
   const [receivedCommand, setReceivedCommand] = useState<Command | null>(null);
 
   // Sheet music state
-  const [sheets, setSheets] = useState<Sheet[]>([]);
-  const [filteredSheets, setFilteredSheets] = useState<Sheet[]>([]);
-  const [currentSheet, setCurrentSheet] = useState<Sheet | null>(null);
+  const [sheets, setSheets] = useState<SheetDto[]>([]);
+  const [filteredSheets, setFilteredSheets] = useState<SheetDto[]>([]);
+  const [currentSheet, setCurrentSheet] = useState<SheetDto | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filter state
@@ -181,7 +171,7 @@ const WorshipPage: React.FC = () => {
   useEffect(() => {
     if (!isConnected) return;
 
-    const unsubscribe = subscribe<Sheet[]>('sheets', (data) => {
+    const unsubscribe = subscribe<SheetDto[]>('sheets', (data) => {
       console.log('Sheets received:', data);
       setSheets(data);
     });
@@ -251,20 +241,53 @@ const WorshipPage: React.FC = () => {
     return unsubscribe;
   }, [isConnected, subscribe, sheets]);
 
+  // State for commands
+  const [commandsMap, setCommandsMap] = useState<Record<string, string>>({});
+
+  // Load commands from Electron (via IPC)
+  useEffect(() => {
+    const loadCommands = async () => {
+      try {
+        if (typeof window.electron !== 'undefined') {
+          // Use IPC to load commands from JSON file
+          const commandsData = await window.electron.ipcRenderer.invoke('read-json', 'commands.json') as { commands?: Command[] };
+
+          if (commandsData && commandsData.commands) {
+            // Create a map of emoji to text for quick lookup
+            const emojiMap: Record<string, string> = {};
+            commandsData.commands.forEach((cmd: Command) => {
+              emojiMap[cmd.emoji] = cmd.text;
+            });
+            setCommandsMap(emojiMap);
+          } else {
+            console.error('Commands data not found or invalid format');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading commands:', error);
+      }
+    };
+
+    loadCommands();
+  }, []);
+
   // Handle sending commands
   const handleSendCommand = (emoji: string) => {
     if (!profile) return;
 
+    // Look up the text for this emoji from our commands map
+    const text = commandsMap[emoji] || '';
+
     const command: Command = {
       emoji,
-      text: '', // In a real implementation, we would look up the text for this emoji
+      text,
     };
 
     sendCommand(command);
   };
 
   // Handle sheet selection
-  const handleSelectSheet = (sheet: Sheet) => {
+  const handleSelectSheet = (sheet: SheetDto) => {
     setCurrentSheet(sheet);
     setCurrentPage(1);
 
@@ -300,13 +323,15 @@ const WorshipPage: React.FC = () => {
               {isDrawingMode ? '그리기 모드' : '보기 모드'}
             </Button>
             {/* 악보 업로드 버튼 추가 */}
-            <SheetMusicUpload onUploadComplete={() => {
-              // 업로드 완료 후 악보 목록 새로고침
-              if (isConnected && socket) {
-                // 기존 소켓 연결을 사용하여 악보 목록 요청
-                socket.emit('get-sheets');
-              }
-            }} />
+            <SheetMusicUpload
+              onUploadComplete={() => {
+                // 업로드 완료 후 악보 목록 새로고침
+                if (isConnected && socket) {
+                  // 기존 소켓 연결을 사용하여 악보 목록 요청
+                  socket.emit('get-sheets');
+                }
+              }}
+            />
           </div>
         </div>
 

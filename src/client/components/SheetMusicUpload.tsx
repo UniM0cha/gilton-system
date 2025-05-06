@@ -1,25 +1,11 @@
-/* eslint-disable no-console */
 import React, { useState } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-
-// 업로드 결과 인터페이스 정의
-interface UploadResult {
-  success: boolean;
-  sheet?: {
-    id: string;
-    title: string;
-    fileName: string;
-    uploadedAt: string;
-    date?: string;
-    serviceType?: string;
-  };
-  error?: string;
-  path?: string;
-}
+import { Button } from '@client/components/ui/button';
+import { Input } from '@client/components/ui/input';
+import { Label } from '@client/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@client/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@client/components/ui/card';
+import { SheetUploadRequestDto } from '@shared/types/dtos';
+import { uploadSheetMusic } from '@client/utils/uploadUtils';
 
 interface SheetMusicUploadProps {
   onUploadComplete?: () => void;
@@ -73,64 +59,17 @@ const SheetMusicUpload: React.FC<SheetMusicUploadProps> = ({ onUploadComplete })
 
             const imageData = event.target.result;
 
-            // Electron IPC를 통해 파일 업로드
+            // 공통 업로드 유틸리티 함수 사용
             try {
-              // Electron 환경인지 확인
-              if (typeof window.electron !== 'undefined') {
-                const result = await window.electron.ipcRenderer.invoke('upload-sheet', {
-                  title: uploadTitle,
-                  date: uploadDate,
-                  serviceType: uploadServiceType,
-                  fileName: file.name,
-                  imageData
-                }) as UploadResult;
+              const uploadRequest: SheetUploadRequestDto = {
+                title: uploadTitle,
+                date: uploadDate,
+                serviceType: uploadServiceType,
+                fileName: file.name,
+                imageData,
+              };
 
-                if (result.success) {
-                  console.log('악보 업로드 성공:', result.sheet);
-                } else {
-                  console.error('악보 업로드 실패:', result.error);
-                  reject(new Error(result.error || '알 수 없는 오류'));
-                  return;
-                }
-              } else {
-                // 브라우저 환경에서는 서버 API를 통해 업로드
-                console.log('브라우저 환경에서 업로드 시도:', {
-                  title: uploadTitle,
-                  date: uploadDate,
-                  serviceType: uploadServiceType,
-                  fileName: file.name
-                });
-
-                // 서버 API를 통한 업로드 로직
-                const apiUrl = 'http://localhost:3001/api/upload-sheet'; // 직접 Electron 서버에 연결
-
-                const response = await fetch(apiUrl, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                  },
-                  credentials: 'include',
-                  mode: 'cors',
-                  body: JSON.stringify({
-                    title: uploadTitle,
-                    date: uploadDate,
-                    serviceType: uploadServiceType,
-                    fileName: file.name,
-                    imageData
-                  }),
-                });
-
-                const result = await response.json() as UploadResult;
-
-                if (!response.ok || !result.success) {
-                  console.error('악보 업로드 실패:', result.error);
-                  reject(new Error(result.error || '업로드 실패'));
-                  return;
-                }
-
-                console.log('악보 업로드 성공:', result.sheet);
-              }
+              await uploadSheetMusic(uploadRequest);
 
               resolve();
             } catch (error) {
@@ -166,12 +105,7 @@ const SheetMusicUpload: React.FC<SheetMusicUploadProps> = ({ onUploadComplete })
 
   return (
     <>
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={() => setIsUploadModalOpen(true)}
-        className="ml-2"
-      >
+      <Button variant="outline" size="sm" onClick={() => setIsUploadModalOpen(true)} className="ml-2">
         악보 업로드
       </Button>
 
@@ -194,7 +128,12 @@ const SheetMusicUpload: React.FC<SheetMusicUploadProps> = ({ onUploadComplete })
 
               <div className="space-y-2">
                 <Label htmlFor="upload-date">날짜</Label>
-                <Input id="upload-date" type="date" value={uploadDate} onChange={(e) => setUploadDate(e.target.value)} />
+                <Input
+                  id="upload-date"
+                  type="date"
+                  value={uploadDate}
+                  onChange={(e) => setUploadDate(e.target.value)}
+                />
               </div>
 
               <div className="space-y-2">
@@ -238,7 +177,10 @@ const SheetMusicUpload: React.FC<SheetMusicUploadProps> = ({ onUploadComplete })
                 <Button variant="outline" onClick={() => setIsUploadModalOpen(false)} disabled={isUploading}>
                   취소
                 </Button>
-                <Button onClick={handleUpload} disabled={isUploading || uploadFiles.length === 0 || !uploadTitle.trim()}>
+                <Button
+                  onClick={handleUpload}
+                  disabled={isUploading || uploadFiles.length === 0 || !uploadTitle.trim()}
+                >
                   {isUploading ? '업로드 중...' : '업로드'}
                 </Button>
               </div>

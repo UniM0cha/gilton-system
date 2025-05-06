@@ -1,46 +1,15 @@
-/* eslint-disable no-console */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { 
+  ProfileDto as Profile, 
+  CommandDto as Command, 
+  SheetChangeDto as SheetChange,
+  DrawingDataDto as DrawingData
+} from '@shared/types/dtos';
 
 interface UseSocketOptions {
   url?: string;
   autoConnect?: boolean;
-}
-
-export interface Profile {
-  nickname: string;
-  role: string;
-  icon: string;
-  favoriteCommands: string[];
-}
-
-export interface Command {
-  emoji: string;
-  text: string;
-}
-
-export interface SheetChange {
-  sheetId: string;
-  pageNumber?: number;
-}
-
-// Define a type for drawing paths
-export interface DrawingPath {
-  points: Array<{ x: number; y: number }>;
-  color: string;
-  width: number;
-  opacity?: number;
-}
-
-export interface DrawingData {
-  sheetId: string;
-  pageNumber: number;
-  paths: DrawingPath[]; // Now using a specific type instead of any[]
-}
-
-export interface CommandEvent {
-  command: Command;
-  sender: Profile;
 }
 
 const useSocket = (options: UseSocketOptions = {}) => {

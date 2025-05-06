@@ -1,24 +1,15 @@
-/* eslint-disable no-console */
-import * as path from 'path';
 import * as fs from 'fs';
 import { Server as SocketIOServer } from 'socket.io';
 import { Server as HttpServer } from 'http';
-import { app } from 'electron';
+import { sheetsPath } from '@server/paths';
+import { wsCorsOptions } from '@server/config/cors';
 
 // 웹소켓 라우팅 모듈
-
-// 데이터 디렉토리 정의
-const dataDir = path.join(app.getPath('userData'), 'data');
-const sheetsPath = path.join(dataDir, 'sheets.json');
 
 // 웹소켓 서버 생성 및 이벤트 핸들러 설정
 export const setupWebSocketServer = (httpServer: HttpServer) => {
   const io = new SocketIOServer(httpServer, {
-    cors: {
-      origin: ['http://localhost:3000', 'http://localhost:3001'],
-      methods: ['GET', 'POST', 'OPTIONS'],
-      credentials: true,
-    },
+    cors: wsCorsOptions,
     path: '/socket.io',
   });
 

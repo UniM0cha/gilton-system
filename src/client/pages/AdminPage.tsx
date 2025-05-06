@@ -1,11 +1,12 @@
-/* eslint-disable no-console */
 import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Button } from '@client/components/ui/button';
+import { Input } from '@client/components/ui/input';
+import { Label } from '@client/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@client/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@client/components/ui/select';
+import { SheetDto, SheetUploadRequestDto, SheetUploadResponseDto } from '@shared/types/dtos';
+import { uploadSheetMusic } from '@client/utils/uploadUtils';
 
 // Types
 interface Profile {
@@ -13,21 +14,6 @@ interface Profile {
   role: string;
   icon: string;
   favoriteCommands: string[];
-}
-
-// 업로드 결과 인터페이스 정의
-interface UploadResult {
-  success: boolean;
-  sheet?: {
-    id: string;
-    title: string;
-    fileName: string;
-    uploadedAt: string;
-    date?: string;
-    serviceType?: string;
-  };
-  error?: string;
-  path?: string;
 }
 
 interface User {
@@ -41,20 +27,11 @@ interface Command {
   text: string;
 }
 
-interface Sheet {
-  id: string;
-  title: string;
-  fileName: string;
-  uploadedAt: string;
-  date?: string;
-  serviceType?: string;
-}
-
 const AdminPage: React.FC = () => {
   // State
   const [users, setUsers] = useState<User[]>([]);
   const [commands, setCommands] = useState<Command[]>([]);
-  const [sheets, setSheets] = useState<Sheet[]>([]);
+  const [sheets, setSheets] = useState<SheetDto[]>([]);
   const [currentSheet, setCurrentSheet] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected'>('disconnected');
 
@@ -104,12 +81,12 @@ const AdminPage: React.FC = () => {
     });
 
     // Listen for sheet updates
-    newSocket.on('sheets', (updatedSheets: Sheet[]) => {
+    newSocket.on('sheets', (updatedSheets: SheetDto[]) => {
       console.log('Sheets updated:', updatedSheets);
       setSheets(updatedSheets);
     });
 
-    newSocket.on('sheets-updated', (updatedSheets: Sheet[]) => {
+    newSocket.on('sheets-updated', (updatedSheets: SheetDto[]) => {
       console.log('Sheets updated:', updatedSheets);
       setSheets(updatedSheets);
     });
@@ -124,28 +101,38 @@ const AdminPage: React.FC = () => {
 
   // Load data from Electron (via IPC)
   useEffect(() => {
-    // In a real implementation, this would use IPC to load data from JSON files
-    // For now, we'll just simulate it
     const loadData = async () => {
       try {
-        // This would be replaced with actual IPC calls in the Electron app
-        // const commands = await window.electron.readJson('commands.json');
-        // const sessions = await window.electron.readJson('sessions.json');
+        if (typeof window.electron !== 'undefined') {
+          // Use IPC to load data from JSON files
+          const commandsData = await window.electron.ipcRenderer.invoke('read-json', 'commands.json') as { commands?: Command[] };
+          const sessionsData = await window.electron.ipcRenderer.invoke('read-json', 'sessions.json');
 
-        // Simulated data for now
-        setCommands([
-          { emoji: '1️⃣', text: '1절' },
-          { emoji: '2️⃣', text: '2절' },
-          { emoji: '3️⃣', text: '3절' },
-          { emoji: '🔂', text: '한 번 더 반복' },
-          { emoji: '🔁', text: '계속 반복' },
-          { emoji: '▶️', text: '시작' },
-          { emoji: '⏹️', text: '정지' },
-          { emoji: '⏭️', text: '다음 곡' },
-          { emoji: '🔊', text: '볼륨 업' },
-          { emoji: '🔉', text: '볼륨 다운' },
-          { emoji: '👍', text: '좋음' },
-        ]);
+          if (commandsData && commandsData.commands) {
+            setCommands(commandsData.commands);
+          } else {
+            console.error('Commands data not found or invalid format');
+          }
+
+          // You can use sessionsData here if needed
+          console.log('Sessions data:', sessionsData);
+        } else {
+          console.warn('Electron API not available, using fallback data');
+          // Fallback for non-Electron environments
+          setCommands([
+            { emoji: '1️⃣', text: '1절' },
+            { emoji: '2️⃣', text: '2절' },
+            { emoji: '3️⃣', text: '3절' },
+            { emoji: '🔂', text: '한 번 더 반복' },
+            { emoji: '🔁', text: '계속 반복' },
+            { emoji: '▶️', text: '시작' },
+            { emoji: '⏹️', text: '정지' },
+            { emoji: '⏭️', text: '다음 곡' },
+            { emoji: '🔊', text: '볼륨 업' },
+            { emoji: '🔉', text: '볼륨 다운' },
+            { emoji: '👍', text: '좋음' },
+          ]);
+        }
       } catch (error) {
         console.error('Error loading data:', error);
       }
@@ -155,19 +142,72 @@ const AdminPage: React.FC = () => {
   }, []);
 
   // Reset data
-  const handleResetProfiles = () => {
-    // In a real implementation, this would use IPC to reset the profiles.json file
+  const handleResetProfiles = async () => {
     if (window.confirm('정말로 모든 프로필을 초기화하시겠습니까?')) {
-      console.log('Profiles reset');
-      alert('프로필이 초기화되었습니다.');
+      try {
+        if (typeof window.electron !== 'undefined') {
+          // Use IPC to reset the profiles.json file
+          const result = await window.electron.ipcRenderer.invoke('write-json', 'profiles.json', { profiles: [] });
+
+          if (result) {
+            console.log('Profiles reset successfully');
+            alert('프로필이 초기화되었습니다.');
+          } else {
+            console.error('Failed to reset profiles');
+            alert('프로필 초기화에 실패했습니다.');
+          }
+        } else {
+          console.warn('Electron API not available');
+          alert('일렉트론 환경에서만 사용 가능한 기능입니다.');
+        }
+      } catch (error) {
+        console.error('Error resetting profiles:', error);
+        alert('프로필 초기화 중 오류가 발생했습니다.');
+      }
     }
   };
 
-  const handleResetCommands = () => {
-    // In a real implementation, this would use IPC to reset the commands.json file
+  const handleResetCommands = async () => {
     if (window.confirm('정말로 모든 명령을 초기화하시겠습니까?')) {
-      console.log('Commands reset');
-      alert('명령이 초기화되었습니다.');
+      try {
+        if (typeof window.electron !== 'undefined') {
+          // Default commands to reset to
+          const defaultCommands = {
+            commands: [
+              { emoji: '1️⃣', text: '1절' },
+              { emoji: '2️⃣', text: '2절' },
+              { emoji: '3️⃣', text: '3절' },
+              { emoji: '🔂', text: '한 번 더 반복' },
+              { emoji: '🔁', text: '계속 반복' },
+              { emoji: '▶️', text: '시작' },
+              { emoji: '⏹️', text: '정지' },
+              { emoji: '⏭️', text: '다음 곡' },
+              { emoji: '🔊', text: '볼륨 업' },
+              { emoji: '🔉', text: '볼륨 다운' },
+              { emoji: '👍', text: '좋음' },
+            ],
+          };
+
+          // Use IPC to reset the commands.json file
+          const result = await window.electron.ipcRenderer.invoke('write-json', 'commands.json', defaultCommands);
+
+          if (result) {
+            console.log('Commands reset successfully');
+            // Update the local state with the default commands
+            setCommands(defaultCommands.commands);
+            alert('명령이 초기화되었습니다.');
+          } else {
+            console.error('Failed to reset commands');
+            alert('명령 초기화에 실패했습니다.');
+          }
+        } else {
+          console.warn('Electron API not available');
+          alert('일렉트론 환경에서만 사용 가능한 기능입니다.');
+        }
+      } catch (error) {
+        console.error('Error resetting commands:', error);
+        alert('명령 초기화 중 오류가 발생했습니다.');
+      }
     }
   };
 
@@ -175,7 +215,7 @@ const AdminPage: React.FC = () => {
   const handleOpenDataDirectory = async () => {
     try {
       if (typeof window.electron !== 'undefined') {
-        const result = await window.electron.ipcRenderer.invoke('open-data-directory') as UploadResult;
+        const result = (await window.electron.ipcRenderer.invoke('open-data-directory')) as SheetUploadResponseDto;
         if (result.success) {
           console.log('데이터 디렉토리 열기 성공:', result.path);
         } else {
@@ -227,64 +267,17 @@ const AdminPage: React.FC = () => {
 
             const imageData = event.target.result;
 
-            // Electron IPC를 통해 파일 업로드
+            // 공통 업로드 유틸리티 함수 사용
             try {
-              // Electron 환경인지 확인
-              if (typeof window.electron !== 'undefined') {
-                const result = await window.electron.ipcRenderer.invoke('upload-sheet', {
-                  title: uploadTitle,
-                  date: uploadDate,
-                  serviceType: uploadServiceType,
-                  fileName: file.name,
-                  imageData
-                }) as UploadResult;
+              const uploadRequest: SheetUploadRequestDto = {
+                title: uploadTitle,
+                date: uploadDate,
+                serviceType: uploadServiceType,
+                fileName: file.name,
+                imageData,
+              };
 
-                if (result.success) {
-                  console.log('악보 업로드 성공:', result.sheet);
-                } else {
-                  console.error('악보 업로드 실패:', result.error);
-                  reject(new Error(result.error || '알 수 없는 오류'));
-                  return;
-                }
-              } else {
-                // 브라우저 환경에서는 서버 API를 통해 업로드
-                console.log('브라우저 환경에서 업로드 시도:', {
-                  title: uploadTitle,
-                  date: uploadDate,
-                  serviceType: uploadServiceType,
-                  fileName: file.name
-                });
-
-                // 서버 API를 통한 업로드 로직
-                const apiUrl = 'http://localhost:3001/api/upload-sheet'; // 직접 Electron 서버에 연결
-
-                const response = await fetch(apiUrl, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                  },
-                  credentials: 'include',
-                  mode: 'cors',
-                  body: JSON.stringify({
-                    title: uploadTitle,
-                    date: uploadDate,
-                    serviceType: uploadServiceType,
-                    fileName: file.name,
-                    imageData
-                  }),
-                });
-
-                const result = await response.json() as UploadResult;
-
-                if (!response.ok || !result.success) {
-                  console.error('악보 업로드 실패:', result.error);
-                  reject(new Error(result.error || '업로드 실패'));
-                  return;
-                }
-
-                console.log('악보 업로드 성공:', result.sheet);
-              }
+              await uploadSheetMusic(uploadRequest);
 
               resolve();
             } catch (error) {

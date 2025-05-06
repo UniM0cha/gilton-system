@@ -90,13 +90,3 @@ html, body {
   display: flex;
   flex-direction: column;
 }
-
-/* Hide scrollbar but allow scrolling */
-::-webkit-scrollbar {
-  display: none;
-}
-
-* {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
