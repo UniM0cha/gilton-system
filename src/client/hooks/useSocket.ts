@@ -94,3 +94,5 @@ const useSocket = (options: UseSocketOptions = {}) => {
 };
 
 export default useSocket;
+
+export type { Profile, Command, SheetChange };

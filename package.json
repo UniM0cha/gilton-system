@@ -12,7 +12,9 @@
     "build:electron": "tsc -p tsconfig.electron.json",
     "start": "electron dist/electron/main.js",
     "preview": "vite preview",
-    "lint": "eslint --ext .ts,.tsx ."
+    "lint": "eslint --ext .ts,.tsx .",
+    "typecheck": "tsc -p tsconfig.client.json --noEmit && tsc -p tsconfig.electron.json --noEmit",
+    "test": "npm run lint && npm run typecheck"
   },
   "keywords": [
     "worship",
