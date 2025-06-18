@@ -1,0 +1,18 @@
+# Node
+node_modules
+**/node_modules
+
+# Logs
+logs
+*.log
+
+# Build output
+client/dist
+server/dist
+
+# Mac
+.DS_Store
+
+# Editor
+.idea/
+.vscode/

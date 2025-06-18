@@ -130,3 +130,24 @@
 - 서버는 반드시 macOS에서 Electron 앱 형태로 구동
 - 전체 앱은 **오프라인 캐싱(PWA 기능)** 을 고려할 필요는 없음 (Wi-Fi 상시 연결 가정)
 - **다중 사용자 동시 접속 환경**에서도 성능 저하 없이 동작해야 함
+
+---
+
+## 프로젝트 실행 방법
+
+### 클라이언트
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+### 서버
+
+```bash
+cd server
+npm install
+npm start
+```
+
