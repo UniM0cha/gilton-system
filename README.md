@@ -135,19 +135,31 @@
 
 ## 프로젝트 실행 방법
 
-### 클라이언트
+### 루트 패키지 설치
 
 ```bash
-cd client
 npm install
-npm run dev
 ```
 
-### 서버
+위 명령은 클라이언트와 서버 워크스페이스의 의존성을 한 번에 설치합니다.
+
+### 클라이언트 실행
 
 ```bash
-cd server
-npm install
-npm start
+npm run dev -w client
 ```
+
+### 서버 실행
+
+```bash
+npm start -w server
+```
+
+### 린트 실행
+
+```bash
+npm run lint
+```
+
+루트에서 위 명령을 실행하면 클라이언트와 서버 두 프로젝트의 린트가 연달아 수행됩니다.
 

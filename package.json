@@ -1,0 +1,8 @@
+{
+  "name": "gilton-system",
+  "private": true,
+  "workspaces": ["client", "server"],
+  "scripts": {
+    "lint": "npm --workspaces run lint"
+  }
+}
