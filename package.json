@@ -1,6 +1,7 @@
 {
   "name": "gilton-system",
   "private": true,
+  "type": "module",
   "workspaces": [
     "client",
     "server"
