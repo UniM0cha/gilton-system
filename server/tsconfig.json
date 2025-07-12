@@ -4,7 +4,11 @@
     "checkJs": true,
     "noEmit": true,
     "target": "ES2022",
-    "module": "commonjs"
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "strict": true,
+    "outDir": "dist",
+    "skipLibCheck": true
   },
-  "include": ["**/*.js"]
+  "include": ["index.ts", "main.ts"]
 }

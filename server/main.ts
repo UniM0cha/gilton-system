@@ -1,4 +1,5 @@
-const { app, BrowserWindow } = require("electron");
+import { app, BrowserWindow } from 'electron';
+import './index';
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -9,22 +10,21 @@ function createWindow() {
     },
   });
 
-  win.loadURL("http://localhost:5173/admin");
+  win.loadURL('http://localhost:5173/admin');
 }
 
 app.whenReady().then(() => {
-  require("./index.js");
   createWindow();
 
-  app.on("activate", () => {
+  app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
 });
 
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
     app.quit();
   }
 });
