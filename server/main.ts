@@ -13,8 +13,9 @@ function createWindow() {
   win.loadURL('http://localhost:5173/admin');
 }
 
-app.whenReady().then(async () => {
-  await startServer();
+app.whenReady().then(() => {
+  const dataPath = app.getPath('userData');
+  startServer(dataPath);
   createWindow();
 
   app.on('activate', () => {
