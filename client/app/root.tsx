@@ -1,4 +1,4 @@
-import { Link, Outlet } from 'react-router'
+import { Link, Outlet } from "react-router";
 
 export default function Root() {
   return (
@@ -8,5 +8,5 @@ export default function Root() {
       </nav>
       <Outlet />
     </div>
-  )
+  );
 }
