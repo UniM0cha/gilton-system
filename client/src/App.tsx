@@ -1,4 +1,5 @@
 import { Link, Route, Routes } from 'react-router-dom'
+import Admin from './Admin'
 import { useCounterStore } from './store'
 
 function Home() {
@@ -25,6 +26,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </div>
   )

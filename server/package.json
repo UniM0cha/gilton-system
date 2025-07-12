@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "dev": "electron --no-sandbox main.js",
     "test": "echo \"No tests\"",
     "lint": "eslint . --config .eslintrc.cjs"
   },
@@ -16,6 +17,7 @@
     "express": "^5.1.0"
   },
   "devDependencies": {
+    "electron": "^30.5.1",
     "eslint": "^8.57.1"
   }
 }
