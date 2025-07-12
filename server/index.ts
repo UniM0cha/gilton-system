@@ -1,43 +1,41 @@
-import express from 'express';
-import type { Server } from 'http';
-import cors from 'cors';
-import { join } from 'path';
-import { getProfiles, createProfile } from './profileStore';
+import express from "express";
+import type { Server } from "http";
+import cors from "cors";
+import { createProfile, getProfiles } from "./profileStore";
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
 
 let server: Server | null = null;
 
-
 app.use(cors());
 app.use(express.json());
 
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
 });
 
-app.get('/profiles', async (_req, res) => {
-  const profiles = await getProfiles(userDataPath);
-  res.json(profiles);
-});
-
-app.post('/profiles', async (req, res) => {
-  const { name, role, icon, commands } = req.body ?? {};
-  if (!name || !role) {
-    res.status(400).json({ error: 'name and role required' });
-    return;
-  }
-  const profile = await createProfile(userDataPath, {
-    name,
-    role,
-    icon,
-    commands,
+export function startServer(userDataPath: string): Promise<Server> {
+  app.get("/profiles", async (_req, res) => {
+    const profiles = await getProfiles(userDataPath);
+    res.json(profiles);
   });
-  res.status(201).json(profile);
-});
 
-export function startServer(): Promise<Server> {
+  app.post("/profiles", async (req, res) => {
+    const { name, role, icon, commands } = req.body ?? {};
+    if (!name || !role) {
+      res.status(400).json({ error: "name and role required" });
+      return;
+    }
+    const profile = await createProfile(userDataPath, {
+      name,
+      role,
+      icon,
+      commands,
+    });
+    res.status(201).json(profile);
+  });
+
   return new Promise((resolve, reject) => {
     if (server) {
       resolve(server);
@@ -49,7 +47,7 @@ export function startServer(): Promise<Server> {
         console.log(`Server listening on http://localhost:${port}`);
         resolve(server!);
       })
-      .on('error', (err) => {
+      .on("error", (err) => {
         reject(err);
       });
   });
@@ -67,7 +65,7 @@ export function stopServer(): Promise<void> {
         reject(err);
         return;
       }
-      console.log('Server stopped');
+      console.log("Server stopped");
       server = null;
       resolve();
     });
