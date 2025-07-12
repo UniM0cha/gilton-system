@@ -6,7 +6,13 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["dist", "node_modules", "eslint.config.js"],
+    ignores: [
+      "dist",
+      "node_modules",
+      "eslint.config.js",
+      "client/.react-router",
+      "server/dist",
+    ],
   },
   {
     files: ["**/*.{js,ts,tsx}"],
