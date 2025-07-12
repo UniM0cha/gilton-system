@@ -1,4 +1,4 @@
-import { useCounterStore } from './store'
+import { useCounterStore } from '../store'
 
 export default function Home() {
   const { count, inc } = useCounterStore()
