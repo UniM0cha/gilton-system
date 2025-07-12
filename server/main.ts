@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from 'electron';
-import './index';
+import { startServer, stopServer } from './index';
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -13,7 +13,8 @@ function createWindow() {
   win.loadURL('http://localhost:5173/admin');
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  await startServer();
   createWindow();
 
   app.on('activate', () => {
@@ -23,8 +24,13 @@ app.whenReady().then(() => {
   });
 });
 
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
   if (process.platform !== 'darwin') {
+    await stopServer();
     app.quit();
   }
+});
+
+app.on('before-quit', () => {
+  void stopServer();
 });
