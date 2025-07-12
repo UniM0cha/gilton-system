@@ -1,45 +1,77 @@
 import express from 'express';
+import type { Server } from 'http';
 import cors from 'cors';
 import { join } from 'path';
 import { getProfiles, createProfile } from './profileStore';
 
-export function startServer(userDataPath: string) {
-  const app = express();
-  const port = process.env.PORT || 3000;
+const app = express();
+const port = Number(process.env.PORT) || 3000;
 
-  app.use(cors());
-  app.use(express.json());
+let server: Server | null = null;
 
-  app.get('/health', (_req, res) => {
-    res.json({ status: 'ok' });
+
+app.use(cors());
+app.use(express.json());
+
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
+app.get('/profiles', async (_req, res) => {
+  const profiles = await getProfiles(userDataPath);
+  res.json(profiles);
+});
+
+app.post('/profiles', async (req, res) => {
+  const { name, role, icon, commands } = req.body ?? {};
+  if (!name || !role) {
+    res.status(400).json({ error: 'name and role required' });
+    return;
+  }
+  const profile = await createProfile(userDataPath, {
+    name,
+    role,
+    icon,
+    commands,
   });
+  res.status(201).json(profile);
+});
 
-  app.get('/profiles', async (_req, res) => {
-    const profiles = await getProfiles(userDataPath);
-    res.json(profiles);
-  });
-
-  app.post('/profiles', async (req, res) => {
-    const { name, role, icon, commands } = req.body ?? {};
-    if (!name || !role) {
-      res.status(400).json({ error: 'name and role required' });
+export function startServer(): Promise<Server> {
+  return new Promise((resolve, reject) => {
+    if (server) {
+      resolve(server);
       return;
     }
-    const profile = await createProfile(userDataPath, {
-      name,
-      role,
-      icon,
-      commands,
+
+    server = app
+      .listen(port, () => {
+        console.log(`Server listening on http://localhost:${port}`);
+        resolve(server!);
+      })
+      .on('error', (err) => {
+        reject(err);
+      });
+  });
+}
+
+export function stopServer(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!server) {
+      resolve();
+      return;
+    }
+
+    server.close((err) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      console.log('Server stopped');
+      server = null;
+      resolve();
     });
-    res.status(201).json(profile);
-  });
-
-  app.listen(port, () => {
-    console.log(`Server listening on http://localhost:${port}`);
   });
 }
 
-if (require.main === module) {
-  const dataPath = process.env.USER_DATA_PATH || join(process.cwd(), 'data');
-  startServer(dataPath);
-}
+export { app };
