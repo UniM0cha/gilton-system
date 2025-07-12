@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from 'electron';
-import './index';
+import { startServer } from './index';
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -14,6 +14,8 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  const dataPath = app.getPath('userData');
+  startServer(dataPath);
   createWindow();
 
   app.on('activate', () => {

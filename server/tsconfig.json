@@ -10,5 +10,5 @@
     "outDir": "dist",
     "skipLibCheck": true
   },
-  "include": ["index.ts", "main.ts"]
+  "include": ["index.ts", "main.ts", "profileStore.ts"]
 }
