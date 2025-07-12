@@ -1,5 +1,5 @@
-import { app, BrowserWindow } from 'electron';
-import { startServer, stopServer } from './index';
+import { app, BrowserWindow } from "electron";
+import { startServer, stopServer } from "./index";
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -9,13 +9,15 @@ function createWindow() {
       contextIsolation: true,
     },
   });
-
-  win.loadURL('http://localhost:5173/admin');
+  const url = app.isPackaged
+    ? "http://localhost:3000/admin"
+    : "http://localhost:5173/admin";
+  win.loadURL(url);
 }
 
-app.whenReady().then(() => {
-  const dataPath = app.getPath('userData');
-  startServer(dataPath);
+app.whenReady().then(async () => {
+  const dataPath = app.getPath("userData");
+  await startServer(dataPath);
   createWindow();
 
   app.on('activate', () => {

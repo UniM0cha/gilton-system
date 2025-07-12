@@ -1,6 +1,7 @@
 import express from "express";
 import type { Server } from "http";
 import cors from "cors";
+import path from "path";
 import { createProfile, getProfiles } from "./profileStore";
 
 const app = express();
@@ -35,6 +36,14 @@ export function startServer(userDataPath: string): Promise<Server> {
     });
     res.status(201).json(profile);
   });
+
+  if (process.env.NODE_ENV === "production") {
+    const clientPath = path.join(__dirname, "../../client/build/client");
+    app.use(express.static(clientPath));
+    app.get("*", (_req, res) => {
+      res.sendFile(path.join(clientPath, "index.html"));
+    });
+  }
 
   return new Promise((resolve, reject) => {
     if (server) {
