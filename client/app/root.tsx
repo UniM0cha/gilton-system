@@ -2,7 +2,10 @@ import { Link, Outlet } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import "./globals.css";
-import "./pwa";
+
+if (typeof window !== "undefined") {
+  import("./pwa");
+}
 
 const queryClient = new QueryClient();
 

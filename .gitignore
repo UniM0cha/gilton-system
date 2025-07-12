@@ -8,6 +8,7 @@ logs
 
 # Build output
 client/dist
+client/build
 server/dist
 
 # Mac
