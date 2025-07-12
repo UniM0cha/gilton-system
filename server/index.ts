@@ -16,7 +16,7 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-export function startServer(userDataPath: string): Promise<Server> {
+function setupProfileRoutes(userDataPath: string) {
   app.get("/profiles", async (_req, res) => {
     const profiles = await getProfiles(userDataPath);
     res.json(profiles);
@@ -36,6 +36,12 @@ export function startServer(userDataPath: string): Promise<Server> {
     });
     res.status(201).json(profile);
   });
+}
+
+export function startServer(userDataPath: string): Promise<Server> {
+  if (!server) {
+    setupProfileRoutes(userDataPath);
+  }
 
   if (process.env.NODE_ENV === "production") {
     const clientPath = path.join(__dirname, "../../client/build/client");
