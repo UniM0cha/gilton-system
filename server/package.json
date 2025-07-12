@@ -1,8 +1,8 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
   "main": "dist/index.js",
+  "type": "commonjs",
   "scripts": {
     "build": "tsc",
     "start": "npm run build && node dist/index.js",
@@ -10,10 +10,6 @@
     "test": "echo \"No tests\"",
     "lint": "eslint . --config .eslintrc.cjs"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "express": "^5.1.0"
   },
