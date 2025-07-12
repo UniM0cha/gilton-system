@@ -1,16 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
+import { useHealth } from "~/hooks/useHealth";
 import { useCounterStore } from "../store";
-
-function useHealth() {
-  return useQuery({
-    queryKey: ["health"],
-    queryFn: async () => {
-      const res = await fetch("http://localhost:3000/health");
-      return (await res.json()) as { status: string };
-    },
-  });
-}
 
 export default function Home() {
   const { count, inc } = useCounterStore();
