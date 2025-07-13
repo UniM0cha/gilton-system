@@ -1,3 +1,4 @@
-export const QUERY_KEYS = {
-  health: ["health"] as const,
+export const QueryKeys = {
+  HEALTH: ["health"] as const,
+  PROFILES: ["profiles"] as const,
 } as const;

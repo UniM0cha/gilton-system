@@ -1,26 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { useProfileStore, type Profile } from "../store";
-import { fetchProfiles, postProfile } from "../lib/api";
+import { type Profile, useCreateProfile, useProfiles } from "~/hooks/useProfiles";
 
 export default function Home() {
-  const { setProfile } = useProfileStore();
-  const queryClient = useQueryClient();
-  const { data: profiles } = useQuery({
-    queryKey: ["profiles"],
-    queryFn: fetchProfiles,
-  });
-
-  const mutation = useMutation({
-    mutationFn: postProfile,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profiles"] });
-    },
-  });
+  const { data: profiles } = useProfiles();
+  const { mutate: createProfile } = useCreateProfile();
 
   const [name, setName] = useState("");
   const [role, setRole] = useState("세션 사용자");
@@ -35,11 +22,7 @@ export default function Home() {
         <ul className="space-y-2">
           {profiles?.map((p: Profile) => (
             <li key={p.id}>
-              <Button
-                className="w-full justify-start"
-                variant="secondary"
-                onClick={() => setProfile(p)}
-              >
+              <Button className="w-full justify-start" variant="secondary" onClick={() => setProfile(p)}>
                 {p.name} ({p.role})
               </Button>
             </li>
@@ -48,12 +31,7 @@ export default function Home() {
         <div className="space-y-2">
           <div className="space-y-1">
             <Label htmlFor="name">이름</Label>
-            <Input
-              id="name"
-              placeholder="이름"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+            <Input id="name" placeholder="이름" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="space-y-1">
             <Label htmlFor="role">역할</Label>
@@ -71,7 +49,7 @@ export default function Home() {
           <Button
             className="w-full"
             onClick={() => {
-              mutation.mutate({ name, role });
+              createProfile({ name, role });
               setName("");
             }}
           >
