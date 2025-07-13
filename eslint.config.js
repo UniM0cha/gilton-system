@@ -11,6 +11,7 @@ export default tseslint.config(
       "node_modules",
       "eslint.config.js",
       "client/.react-router",
+      "client/build",
       "server/dist",
     ],
   },
