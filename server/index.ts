@@ -2,7 +2,8 @@ import express from "express";
 import type { Server } from "http";
 import cors from "cors";
 import path from "path";
-import { createProfile, getProfiles } from "./profileStore";
+import { createProfileRoutes } from "./routes/profileRoutes";
+import { createHealthRoutes } from "./routes/healthRoutes";
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
@@ -12,35 +13,14 @@ let server: Server | null = null;
 app.use(cors());
 app.use(express.json());
 
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok" });
-});
-
-function setupProfileRoutes(userDataPath: string) {
-  app.get("/profiles", async (_req, res) => {
-    const profiles = await getProfiles(userDataPath);
-    res.json(profiles);
-  });
-
-  app.post("/profiles", async (req, res) => {
-    const { name, role, icon, commands } = req.body ?? {};
-    if (!name || !role) {
-      res.status(400).json({ error: "name and role required" });
-      return;
-    }
-    const profile = await createProfile(userDataPath, {
-      name,
-      role,
-      icon,
-      commands,
-    });
-    res.status(201).json(profile);
-  });
+function setupRoutes(userDataPath: string) {
+  app.use("/health", createHealthRoutes());
+  app.use("/profiles", createProfileRoutes(userDataPath));
 }
 
 export function startServer(userDataPath: string): Promise<Server> {
   if (!server) {
-    setupProfileRoutes(userDataPath);
+    setupRoutes(userDataPath);
   }
 
   if (process.env.NODE_ENV === "production") {
